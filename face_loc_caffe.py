@@ -4,8 +4,8 @@ import numpy as np
 prototxtPath = "./detector/deploy.prototxt"
 weightsPath ="./detector/res10_300x300_ssd_iter_140000.caffemodel"
 faceNet = cv2.dnn.readNet(prototxtPath,weightsPath)
-cap=cv2.VideoCapture('live1.mp4')
-k=0
+cap=cv2.VideoCapture(0)
+
 while True:
     _,frame=cap.read()
     start_time=time.time()
@@ -13,7 +13,7 @@ while True:
     blob = cv2.dnn.blobFromImage(frame, 1.0, (300, 300),(104.0, 177.0, 123.0))
     faceNet.setInput(blob)
     detections = faceNet.forward()
-    locs = []
+    
     for i in range(0, detections.shape[2]):
         confidence = detections[0, 0, i, 2]
         if confidence >= 0.2:						                  # precision
@@ -21,14 +21,8 @@ while True:
             (startX, startY, endX, endY) = box.astype("int")
             (startX, startY) = (max(0, startX), max(0, startY))
             (endX, endY) = (min(w - 1, endX), min(h - 1, endY))
-            #cv2.rectangle(frame,(startX,startY),(endX,endY),(0,0,255),2)
-
-            locs.append((startX, startY, endX, endY))
-            face = frame[startY:endY, startX:endX]
-            face=cv2.resize(face,(32,32))
-            cv2.imwrite(f'images/{k}.jpg',face)
-            k+=1
-    print(len(locs))
+            cv2.rectangle(frame,(startX,startY),(endX,endY),(0,0,255),2)
+            
     cv2.imshow('frame',frame)
     end_time = time.time()
     print(round((1/(end_time-start_time)),2))
